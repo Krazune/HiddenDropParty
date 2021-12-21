@@ -14,7 +14,7 @@ public interface HiddenDropPartyPluginConfig extends Config
 		name = "Tile model IDs",
 		description = "List of model IDs for the obstructing tiles, separated by commas (osrsbox.com has a list of these IDs)."
 	)
-	default String tileModelIds()
+	default String getTileModelIds()
 	{
 		return "21367,21369,21370";
 	}
@@ -25,7 +25,7 @@ public interface HiddenDropPartyPluginConfig extends Config
 		name = "Chest model IDs",
 		description = "List of model IDs for the main objects, separated by commas (osrsbox.com has a list of these IDs)."
 	)
-	default String chestModelIds()
+	default String getChestModelIds()
 	{
 		return "11123,12884,15567,15885";
 	}
@@ -40,7 +40,7 @@ public interface HiddenDropPartyPluginConfig extends Config
 		min = 0,
 		max = 100
 	)
-	default int fakeDropPercentage()
+	default int getFakeDropPercentage()
 	{
 		return 25;
 	}

@@ -66,7 +66,7 @@ public class HiddenDropPartyPlugin extends Plugin
 	{
 		Random rand = new Random();
 
-		if (rand.nextInt(100) < config.fakeDropPercentage())
+		if (rand.nextInt(100) < config.getFakeDropPercentage())
 		{
 			createFakeDrop(client.getLocalPlayer().getWorldLocation());
 		}
@@ -173,7 +173,7 @@ public class HiddenDropPartyPlugin extends Plugin
 	private List<Integer> getTileModelIdsListFromConfig()
 	{
 		List<Integer> tiles = new ArrayList<>();
-		String[] configSplit = config.tileModelIds().split(",");
+		String[] configSplit = config.getTileModelIds().split(",");
 
 		for (int i = 0; i < configSplit.length; ++i)
 		{
@@ -207,7 +207,7 @@ public class HiddenDropPartyPlugin extends Plugin
 	private List<Integer> getChestModelIdsListFromConfig()
 	{
 		List<Integer> chest = new ArrayList<>();
-		String[] configSplit = config.chestModelIds().split(",");
+		String[] configSplit = config.getChestModelIds().split(",");
 
 		for (int i = 0; i < configSplit.length; ++i)
 		{

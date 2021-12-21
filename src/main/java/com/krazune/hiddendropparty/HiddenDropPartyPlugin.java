@@ -59,6 +59,8 @@ public class HiddenDropPartyPlugin extends Plugin
 	private List<Integer> tileModelIds;
 	private List<Integer> chestModelIds;
 
+	private int lastTickPlaneId;
+
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
@@ -70,6 +72,15 @@ public class HiddenDropPartyPlugin extends Plugin
 		}
 
 		removeOldFakeDrops();
+
+		if (lastTickPlaneId == client.getPlane())
+		{
+			return;
+		}
+
+		registry.spawnAll();
+
+		lastTickPlaneId = client.getPlane();
 	}
 
 	@Subscribe
@@ -130,6 +141,7 @@ public class HiddenDropPartyPlugin extends Plugin
 
 		registry = new KObjectLocationRegistry(client, tileModelIds, chestModelIds);
 		fakeDropLocationSpawnInstants = new HashMap<>();
+		lastTickPlaneId = client.getPlane();
 	}
 
 	@Override

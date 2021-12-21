@@ -37,13 +37,18 @@ public class KObjectLocationRegistry
 			return;
 		}
 
-		int tileModelId = getRandomTileModelId(location);
-		int chestModelId = getRandomChestModelId(location);
-
-		KObject newObject = new KObject(client, location, tileModelId, chestModelId);
+		KObject newObject = createRandomKObject(location);
 
 		registry.put(location, new KObjectCounter(newObject, 1));
 		newObject.spawn();
+	}
+
+	public KObject createRandomKObject(WorldPoint location)
+	{
+		int tileModelId = getRandomTileModelId(location);
+		int chestModelId = getRandomChestModelId(location);
+
+		return new KObject(client, location, tileModelId, chestModelId);
 	}
 
 	private int getRandomTileModelId(WorldPoint location)
@@ -62,6 +67,28 @@ public class KObjectLocationRegistry
 		random.setSeed(generateSeed(location));
 
 		return chestModelIds.get(random.nextInt(chestModelIds.size()));
+	}
+
+	public void setTileModelIds(List<Integer> tileModelIds)
+	{
+		this.tileModelIds = tileModelIds;
+
+		recreateAll();
+	}
+
+	public void setChestModelIds(List<Integer> chestModelIds)
+	{
+		this.chestModelIds = chestModelIds;
+
+		recreateAll();
+	}
+
+	public void setModelIds(List<Integer> tileModelIds, List<Integer> chestModelIds)
+	{
+		this.tileModelIds = tileModelIds;
+		this.chestModelIds = chestModelIds;
+
+		recreateAll();
 	}
 
 	private int generateSeed(WorldPoint location)
@@ -111,6 +138,18 @@ public class KObjectLocationRegistry
 		for (KObjectCounter kObjectCounter : registry.values())
 		{
 			kObjectCounter.getKObject().despawn();
+		}
+	}
+
+	public void recreateAll()
+	{
+		for (KObjectCounter kObjectCounter : registry.values())
+		{
+			WorldPoint location = kObjectCounter.getKObject().getLocation();
+
+			kObjectCounter.getKObject().despawn();
+			kObjectCounter.setkObject(createRandomKObject(location));
+			kObjectCounter.getKObject().spawn();
 		}
 	}
 

@@ -26,6 +26,11 @@ public class KObjectCounter
 		return count;
 	}
 
+	public void setkObject(KObject kObject)
+	{
+		this.kObject = kObject;
+	}
+
 	public void setCount(int count)
 	{
 		this.count = count;

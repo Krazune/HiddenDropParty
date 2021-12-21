@@ -20,6 +20,7 @@ import net.runelite.api.events.ItemSpawned;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 
@@ -39,6 +40,9 @@ import net.runelite.client.plugins.PluginDescriptor;
 public class HiddenDropPartyPlugin extends Plugin
 {
 	private final Duration FAKE_DROP_DURATION = Duration.ofMinutes(1);
+
+	private final int DEFAULT_TILE_MODEL_ID = 21367;
+	private final int DEFAULT_CHEST_MODEL_ID = 11123;
 
 	@Inject
 	private Client client;
@@ -100,22 +104,29 @@ public class HiddenDropPartyPlugin extends Plugin
 		}
 	}
 
+	@Subscribe
+	public void onConfigChanged(ConfigChanged configChanged)
+	{
+		if (configChanged.getKey().equals("tileModelIds"))
+		{
+			tileModelIds = getTileModelIdsListFromConfig();
+		}
+		else if (configChanged.getKey().equals("chestModelIds"))
+		{
+			chestModelIds = getChestModelIdsListFromConfig();
+		}
+		else
+		{
+			return;
+		}
+
+		clientThread.invokeLater(this::updateModelIds);
+	}
+
 	@Override
 	protected void startUp()
 	{
-		tileModelIds = new ArrayList<>();
-		chestModelIds = new ArrayList<>();
-
-		// Temporary values.
-		tileModelIds.add(21367);
-		tileModelIds.add(21369);
-		tileModelIds.add(21370);
-
-		// Temporary values.
-		chestModelIds.add(11123);
-		chestModelIds.add(12884);
-		chestModelIds.add(15567);
-		chestModelIds.add(15885);
+		loadModelIdsConfig();
 
 		registry = new KObjectLocationRegistry(client, tileModelIds, chestModelIds);
 		fakeDropLocationSpawnInstants = new HashMap<>();
@@ -134,6 +145,85 @@ public class HiddenDropPartyPlugin extends Plugin
 	HiddenDropPartyPluginConfig provideConfig(ConfigManager configManager)
 	{
 		return configManager.getConfig(HiddenDropPartyPluginConfig.class);
+	}
+
+	private void loadModelIdsConfig()
+	{
+		tileModelIds = getTileModelIdsListFromConfig();
+		chestModelIds = getChestModelIdsListFromConfig();
+	}
+
+	private void updateModelIds()
+	{
+		registry.setModelIds(tileModelIds, chestModelIds);
+	}
+
+	private List<Integer> getTileModelIdsListFromConfig()
+	{
+		List<Integer> tiles = new ArrayList<>();
+		String[] configSplit = config.tileModelIds().split(",");
+
+		for (int i = 0; i < configSplit.length; ++i)
+		{
+			int  modelId;
+
+			try
+			{
+				modelId = Integer.parseInt(configSplit[i]);
+			}
+			catch (NumberFormatException e)
+			{
+				continue;
+			}
+
+			if (modelId < 0)
+			{
+				continue;
+			}
+
+			tiles.add(modelId);
+		}
+
+		if (tiles.isEmpty())
+		{
+			tiles.add(DEFAULT_TILE_MODEL_ID);
+		}
+
+		return tiles;
+	}
+
+	private List<Integer> getChestModelIdsListFromConfig()
+	{
+		List<Integer> chest = new ArrayList<>();
+		String[] configSplit = config.chestModelIds().split(",");
+
+		for (int i = 0; i < configSplit.length; ++i)
+		{
+			int  modelId;
+
+			try
+			{
+				modelId = Integer.parseInt(configSplit[i]);
+			}
+			catch (NumberFormatException e)
+			{
+				continue;
+			}
+
+			if (modelId < 0)
+			{
+				continue;
+			}
+
+			chest.add(modelId);
+		}
+
+		if (chest.isEmpty())
+		{
+			chest.add(DEFAULT_CHEST_MODEL_ID);
+		}
+
+		return chest;
 	}
 
 	private void createFakeDrop(WorldPoint location)

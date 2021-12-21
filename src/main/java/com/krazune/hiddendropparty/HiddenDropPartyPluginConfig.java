@@ -37,7 +37,7 @@ public interface HiddenDropPartyPluginConfig extends Config
 		position = 2,
 		keyName = "fakeDropPercentage",
 		name = "Fake drop percentage",
-		description = "The chance of spawning a fake drop."
+		description = "The chance of spawning a fake drop per tick."
 	)
 	@Range(
 		min = 0,

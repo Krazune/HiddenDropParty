@@ -4,8 +4,10 @@ import com.google.inject.Inject;
 import com.google.inject.Provides;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import net.runelite.api.Client;
@@ -49,6 +51,9 @@ public class HiddenDropPartyPlugin extends Plugin
 
 	private KObjectLocationRegistry registry;
 	private Map<WorldPoint, Instant> fakeDropLocationSpawnInstants;
+
+	private List<Integer> tileModelIds;
+	private List<Integer> chestModelIds;
 
 	@Subscribe
 	public void onGameTick(GameTick tick)
@@ -98,7 +103,21 @@ public class HiddenDropPartyPlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
-		registry = new KObjectLocationRegistry(client);
+		tileModelIds = new ArrayList<>();
+		chestModelIds = new ArrayList<>();
+
+		// Temporary values.
+		tileModelIds.add(21367);
+		tileModelIds.add(21369);
+		tileModelIds.add(21370);
+
+		// Temporary values.
+		chestModelIds.add(11123);
+		chestModelIds.add(12884);
+		chestModelIds.add(15567);
+		chestModelIds.add(15885);
+
+		registry = new KObjectLocationRegistry(client, tileModelIds, chestModelIds);
 		fakeDropLocationSpawnInstants = new HashMap<>();
 	}
 
@@ -107,6 +126,8 @@ public class HiddenDropPartyPlugin extends Plugin
 	{
 		clientThread.invokeLater(this::deleteRegistry);
 		fakeDropLocationSpawnInstants = null;
+		tileModelIds = null;
+		chestModelIds = null;
 	}
 
 	@Provides
@@ -146,7 +167,7 @@ public class HiddenDropPartyPlugin extends Plugin
 	private void resetRegistry()
 	{
 		registry.despawnAll();
-		registry = new KObjectLocationRegistry(client);
+		registry = new KObjectLocationRegistry(client, tileModelIds, chestModelIds);
 	}
 
 	private void recreateFakeDrops()

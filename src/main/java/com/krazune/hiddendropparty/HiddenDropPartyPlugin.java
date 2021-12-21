@@ -64,14 +64,14 @@ public class HiddenDropPartyPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
+		removeOldFakeDrops();
+
 		Random rand = new Random();
 
 		if (rand.nextInt(100) < config.getFakeDropPercentage())
 		{
 			createFakeDrop(client.getLocalPlayer().getWorldLocation());
 		}
-
-		removeOldFakeDrops();
 
 		if (lastTickPlaneId == client.getPlane())
 		{

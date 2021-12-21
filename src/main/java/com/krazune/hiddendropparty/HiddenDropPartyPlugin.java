@@ -59,17 +59,28 @@ public class HiddenDropPartyPlugin extends Plugin
 	private List<Integer> tileModelIds;
 	private List<Integer> chestModelIds;
 
+	private int lastTickPlaneId;
+
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
+		removeOldFakeDrops();
+
 		Random rand = new Random();
 
-		if (rand.nextInt(100) < config.fakeDropPercentage())
+		if (rand.nextInt(100) < config.getFakeDropPercentage())
 		{
 			createFakeDrop(client.getLocalPlayer().getWorldLocation());
 		}
 
-		removeOldFakeDrops();
+		if (lastTickPlaneId == client.getPlane())
+		{
+			return;
+		}
+
+		registry.spawnAll();
+
+		lastTickPlaneId = client.getPlane();
 	}
 
 	@Subscribe
@@ -130,6 +141,7 @@ public class HiddenDropPartyPlugin extends Plugin
 
 		registry = new KObjectLocationRegistry(client, tileModelIds, chestModelIds);
 		fakeDropLocationSpawnInstants = new HashMap<>();
+		lastTickPlaneId = client.getPlane();
 	}
 
 	@Override
@@ -161,7 +173,7 @@ public class HiddenDropPartyPlugin extends Plugin
 	private List<Integer> getTileModelIdsListFromConfig()
 	{
 		List<Integer> tiles = new ArrayList<>();
-		String[] configSplit = config.tileModelIds().split(",");
+		String[] configSplit = config.getTileModelIds().split(",");
 
 		for (int i = 0; i < configSplit.length; ++i)
 		{
@@ -195,7 +207,7 @@ public class HiddenDropPartyPlugin extends Plugin
 	private List<Integer> getChestModelIdsListFromConfig()
 	{
 		List<Integer> chest = new ArrayList<>();
-		String[] configSplit = config.chestModelIds().split(",");
+		String[] configSplit = config.getChestModelIds().split(",");
 
 		for (int i = 0; i < configSplit.length; ++i)
 		{

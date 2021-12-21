@@ -10,6 +10,28 @@ public interface HiddenDropPartyPluginConfig extends Config
 {
 	@ConfigItem(
 		position = 0,
+		keyName = "tileModelIds",
+		name = "Tile model IDs",
+		description = "List of model IDs for the obstructing tiles, separated by commas (osrsbox.com has a list of these IDs)."
+	)
+	default String tileModelIds()
+	{
+		return "21367,21369,21370";
+	}
+
+	@ConfigItem(
+		position = 1,
+		keyName = "chestModelIds",
+		name = "Chest model IDs",
+		description = "List of model IDs for the main objects, separated by commas (osrsbox.com has a list of these IDs)."
+	)
+	default String chestModelIds()
+	{
+		return "11123,12884,15567,15885";
+	}
+
+	@ConfigItem(
+		position = 2,
 		keyName = "fakeDropPercentage",
 		name = "Fake drop percentage",
 		description = "The chance of spawning a fake drop."

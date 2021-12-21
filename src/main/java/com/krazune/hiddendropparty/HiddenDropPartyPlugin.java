@@ -4,8 +4,10 @@ import com.google.inject.Inject;
 import com.google.inject.Provides;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import net.runelite.api.Client;
@@ -18,6 +20,7 @@ import net.runelite.api.events.ItemSpawned;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 
@@ -38,6 +41,9 @@ public class HiddenDropPartyPlugin extends Plugin
 {
 	private final Duration FAKE_DROP_DURATION = Duration.ofMinutes(1);
 
+	private final int DEFAULT_TILE_MODEL_ID = 21367;
+	private final int DEFAULT_CHEST_MODEL_ID = 11123;
+
 	@Inject
 	private Client client;
 
@@ -49,6 +55,9 @@ public class HiddenDropPartyPlugin extends Plugin
 
 	private KObjectLocationRegistry registry;
 	private Map<WorldPoint, Instant> fakeDropLocationSpawnInstants;
+
+	private List<Integer> tileModelIds;
+	private List<Integer> chestModelIds;
 
 	@Subscribe
 	public void onGameTick(GameTick tick)
@@ -95,10 +104,31 @@ public class HiddenDropPartyPlugin extends Plugin
 		}
 	}
 
+	@Subscribe
+	public void onConfigChanged(ConfigChanged configChanged)
+	{
+		if (configChanged.getKey().equals("tileModelIds"))
+		{
+			tileModelIds = getTileModelIdsListFromConfig();
+		}
+		else if (configChanged.getKey().equals("chestModelIds"))
+		{
+			chestModelIds = getChestModelIdsListFromConfig();
+		}
+		else
+		{
+			return;
+		}
+
+		clientThread.invokeLater(this::updateModelIds);
+	}
+
 	@Override
 	protected void startUp()
 	{
-		registry = new KObjectLocationRegistry(client);
+		loadModelIdsConfig();
+
+		registry = new KObjectLocationRegistry(client, tileModelIds, chestModelIds);
 		fakeDropLocationSpawnInstants = new HashMap<>();
 	}
 
@@ -107,12 +137,93 @@ public class HiddenDropPartyPlugin extends Plugin
 	{
 		clientThread.invokeLater(this::deleteRegistry);
 		fakeDropLocationSpawnInstants = null;
+		tileModelIds = null;
+		chestModelIds = null;
 	}
 
 	@Provides
 	HiddenDropPartyPluginConfig provideConfig(ConfigManager configManager)
 	{
 		return configManager.getConfig(HiddenDropPartyPluginConfig.class);
+	}
+
+	private void loadModelIdsConfig()
+	{
+		tileModelIds = getTileModelIdsListFromConfig();
+		chestModelIds = getChestModelIdsListFromConfig();
+	}
+
+	private void updateModelIds()
+	{
+		registry.setModelIds(tileModelIds, chestModelIds);
+	}
+
+	private List<Integer> getTileModelIdsListFromConfig()
+	{
+		List<Integer> tiles = new ArrayList<>();
+		String[] configSplit = config.tileModelIds().split(",");
+
+		for (int i = 0; i < configSplit.length; ++i)
+		{
+			int  modelId;
+
+			try
+			{
+				modelId = Integer.parseInt(configSplit[i]);
+			}
+			catch (NumberFormatException e)
+			{
+				continue;
+			}
+
+			if (modelId < 0)
+			{
+				continue;
+			}
+
+			tiles.add(modelId);
+		}
+
+		if (tiles.isEmpty())
+		{
+			tiles.add(DEFAULT_TILE_MODEL_ID);
+		}
+
+		return tiles;
+	}
+
+	private List<Integer> getChestModelIdsListFromConfig()
+	{
+		List<Integer> chest = new ArrayList<>();
+		String[] configSplit = config.chestModelIds().split(",");
+
+		for (int i = 0; i < configSplit.length; ++i)
+		{
+			int  modelId;
+
+			try
+			{
+				modelId = Integer.parseInt(configSplit[i]);
+			}
+			catch (NumberFormatException e)
+			{
+				continue;
+			}
+
+			if (modelId < 0)
+			{
+				continue;
+			}
+
+			chest.add(modelId);
+		}
+
+		if (chest.isEmpty())
+		{
+			chest.add(DEFAULT_CHEST_MODEL_ID);
+		}
+
+		return chest;
 	}
 
 	private void createFakeDrop(WorldPoint location)
@@ -146,7 +257,7 @@ public class HiddenDropPartyPlugin extends Plugin
 	private void resetRegistry()
 	{
 		registry.despawnAll();
-		registry = new KObjectLocationRegistry(client);
+		registry = new KObjectLocationRegistry(client, tileModelIds, chestModelIds);
 	}
 
 	private void recreateFakeDrops()

@@ -15,7 +15,7 @@ public interface HiddenDropPartyPluginConfig extends Config
 		position = 0,
 		keyName = "tileModelIds",
 		name = "Tile model IDs",
-		description = "List of model IDs for the obstructing tiles, separated by commas (osrsbox.com has a list of these IDs)."
+		description = "List of model IDs for the obstructing tiles, separated by commas (the GitHub page has some useful IDs)."
 	)
 	default String getTileModelIds()
 	{
@@ -26,7 +26,7 @@ public interface HiddenDropPartyPluginConfig extends Config
 		position = 1,
 		keyName = "chestModelIds",
 		name = "Chest model IDs",
-		description = "List of model IDs for the main objects, separated by commas (osrsbox.com has a list of these IDs)."
+		description = "List of model IDs for the main objects, separated by commas (the GitHub page has some useful IDs)."
 	)
 	default String getChestModelIds()
 	{

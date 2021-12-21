@@ -4,6 +4,9 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.Range;
+import net.runelite.client.config.Units;
+
+import static net.runelite.client.config.Units.PERCENT;
 
 @ConfigGroup("hiddendropparty")
 public interface HiddenDropPartyPluginConfig extends Config
@@ -40,6 +43,7 @@ public interface HiddenDropPartyPluginConfig extends Config
 		min = 0,
 		max = 100
 	)
+	@Units(PERCENT)
 	default int getFakeDropPercentage()
 	{
 		return 25;

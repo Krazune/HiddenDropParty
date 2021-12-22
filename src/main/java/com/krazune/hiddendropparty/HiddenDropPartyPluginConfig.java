@@ -57,7 +57,7 @@ public interface HiddenDropPartyPluginConfig extends Config
 	)
 	default String getCustomTileModelIds()
 	{
-		return "21367,21369,21370";
+		return "";
 	}
 
 	@ConfigItem(
@@ -79,7 +79,7 @@ public interface HiddenDropPartyPluginConfig extends Config
 	)
 	default String getCustomChestModelIds()
 	{
-		return "11123,15567,15885";
+		return "";
 	}
 
 	@ConfigItem(

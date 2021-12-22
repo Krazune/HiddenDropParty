@@ -57,7 +57,7 @@ public interface HiddenDropPartyPluginConfig extends Config
 	)
 	default String getChestModelIds()
 	{
-		return "11123,12884,15567,15885";
+		return "11123,15567,15885";
 	}
 
 	@ConfigItem(

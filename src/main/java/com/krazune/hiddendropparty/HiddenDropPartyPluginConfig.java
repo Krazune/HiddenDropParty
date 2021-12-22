@@ -40,6 +40,17 @@ public interface HiddenDropPartyPluginConfig extends Config
 {
 	@ConfigItem(
 		position = 0,
+		keyName = "tileModelIdsGroup",
+		name = "Tile models group",
+		description = "Group of model IDs for the obstructing tiles."
+	)
+	default TileModelIdsGroup getTileModelIdsGroup()
+	{
+		return TileModelIdsGroup.DEFAULT;
+	}
+
+	@ConfigItem(
+		position = 1,
 		keyName = "customTileModelIds",
 		name = "Custom tile model IDs",
 		description = "List of model IDs for the obstructing tiles, separated by commas (the GitHub page has some useful IDs)."
@@ -50,7 +61,18 @@ public interface HiddenDropPartyPluginConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 1,
+		position = 2,
+		keyName = "chestModelIdsGroup",
+		name = "Chest models group",
+		description = "Group of model IDs for the main object."
+	)
+	default ChestModelIdsGroup getChestModelIdsGroup()
+	{
+		return ChestModelIdsGroup.DEFAULT;
+	}
+
+	@ConfigItem(
+		position = 3,
 		keyName = "customChestModelIds",
 		name = "Custom chest model IDs",
 		description = "List of model IDs for the main objects, separated by commas (the GitHub page has some useful IDs)."
@@ -61,7 +83,7 @@ public interface HiddenDropPartyPluginConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 2,
+		position = 4,
 		keyName = "fakeDropPercentage",
 		name = "Fake drop percentage",
 		description = "The chance of spawning a fake drop per tick."

@@ -40,22 +40,22 @@ public interface HiddenDropPartyPluginConfig extends Config
 {
 	@ConfigItem(
 		position = 0,
-		keyName = "tileModelIds",
-		name = "Tile model IDs",
+		keyName = "customTileModelIds",
+		name = "Custom tile model IDs",
 		description = "List of model IDs for the obstructing tiles, separated by commas (the GitHub page has some useful IDs)."
 	)
-	default String getTileModelIds()
+	default String getCustomTileModelIds()
 	{
 		return "21367,21369,21370";
 	}
 
 	@ConfigItem(
 		position = 1,
-		keyName = "chestModelIds",
-		name = "Chest model IDs",
+		keyName = "customChestModelIds",
+		name = "Custom chest model IDs",
 		description = "List of model IDs for the main objects, separated by commas (the GitHub page has some useful IDs)."
 	)
-	default String getChestModelIds()
+	default String getCustomChestModelIds()
 	{
 		return "11123,15567,15885";
 	}

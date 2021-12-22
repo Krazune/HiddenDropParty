@@ -200,7 +200,7 @@ public class HiddenDropPartyPlugin extends Plugin
 	private List<Integer> getTileModelIdsListFromConfig()
 	{
 		List<Integer> tiles = new ArrayList<>();
-		String[] configSplit = config.getTileModelIds().split(",");
+		String[] configSplit = config.getCustomTileModelIds().split(",");
 
 		for (int i = 0; i < configSplit.length; ++i)
 		{
@@ -234,7 +234,7 @@ public class HiddenDropPartyPlugin extends Plugin
 	private List<Integer> getChestModelIdsListFromConfig()
 	{
 		List<Integer> chest = new ArrayList<>();
-		String[] configSplit = config.getChestModelIds().split(",");
+		String[] configSplit = config.getCustomChestModelIds().split(",");
 
 		for (int i = 0; i < configSplit.length; ++i)
 		{

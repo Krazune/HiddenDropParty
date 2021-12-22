@@ -147,11 +147,11 @@ public class HiddenDropPartyPlugin extends Plugin
 	{
 		if (configChanged.getKey().equals("tileModelIds"))
 		{
-			tileModelIds = getTileModelIdsListFromConfig();
+			tileModelIds = parseIds(config.getCustomTileModelIds(), DEFAULT_TILE_MODEL_ID);
 		}
 		else if (configChanged.getKey().equals("chestModelIds"))
 		{
-			chestModelIds = getChestModelIdsListFromConfig();
+			chestModelIds = parseIds(config.getCustomChestModelIds(), DEFAULT_CHEST_MODEL_ID);
 		}
 		else
 		{
@@ -188,81 +188,13 @@ public class HiddenDropPartyPlugin extends Plugin
 
 	private void loadModelIdsConfig()
 	{
-		tileModelIds = getTileModelIdsListFromConfig();
-		chestModelIds = getChestModelIdsListFromConfig();
+		tileModelIds = parseIds(config.getCustomTileModelIds(), DEFAULT_TILE_MODEL_ID);
+		chestModelIds = parseIds(config.getCustomChestModelIds(), DEFAULT_CHEST_MODEL_ID);
 	}
 
 	private void updateModelIds()
 	{
 		registry.setModelIds(tileModelIds, chestModelIds);
-	}
-
-	private List<Integer> getTileModelIdsListFromConfig()
-	{
-		List<Integer> tiles = new ArrayList<>();
-		String[] configSplit = config.getCustomTileModelIds().split(",");
-
-		for (int i = 0; i < configSplit.length; ++i)
-		{
-			int  modelId;
-
-			try
-			{
-				modelId = Integer.parseInt(configSplit[i]);
-			}
-			catch (NumberFormatException e)
-			{
-				continue;
-			}
-
-			if (modelId < 0)
-			{
-				continue;
-			}
-
-			tiles.add(modelId);
-		}
-
-		if (tiles.isEmpty())
-		{
-			tiles.add(DEFAULT_TILE_MODEL_ID);
-		}
-
-		return tiles;
-	}
-
-	private List<Integer> getChestModelIdsListFromConfig()
-	{
-		List<Integer> chest = new ArrayList<>();
-		String[] configSplit = config.getCustomChestModelIds().split(",");
-
-		for (int i = 0; i < configSplit.length; ++i)
-		{
-			int  modelId;
-
-			try
-			{
-				modelId = Integer.parseInt(configSplit[i]);
-			}
-			catch (NumberFormatException e)
-			{
-				continue;
-			}
-
-			if (modelId < 0)
-			{
-				continue;
-			}
-
-			chest.add(modelId);
-		}
-
-		if (chest.isEmpty())
-		{
-			chest.add(DEFAULT_CHEST_MODEL_ID);
-		}
-
-		return chest;
 	}
 
 	private void createFakeDrop(WorldPoint location)
@@ -273,6 +205,40 @@ public class HiddenDropPartyPlugin extends Plugin
 		}
 
 		registry.add(location);
+	}
+
+	private List<Integer> parseIds(String modelIdsString, int defaultModelId)
+	{
+		List<Integer> modelIds = new ArrayList<>();
+		String[] stringSplit = modelIdsString.split(",");
+
+		for (int i = 0; i < stringSplit.length; ++i)
+		{
+			int  modelId;
+
+			try
+			{
+				modelId = Integer.parseInt(stringSplit[i]);
+			}
+			catch (NumberFormatException e)
+			{
+				continue;
+			}
+
+			if (modelId < 0)
+			{
+				continue;
+			}
+
+			modelIds.add(modelId);
+		}
+
+		if (modelIds.isEmpty())
+		{
+			modelIds.add(defaultModelId);
+		}
+
+		return modelIds;
 	}
 
 	private void removeOldFakeDrops()

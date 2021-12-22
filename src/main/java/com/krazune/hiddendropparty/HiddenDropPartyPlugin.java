@@ -53,7 +53,7 @@ import net.runelite.client.plugins.PluginDescriptor;
 
 @PluginDescriptor(
 	name = "Hidden Drop Party",
-	description = "Hides the drop party drops. Useful for streamers.",
+	description = "Hides drops. Useful for streamers that want to make drop parties on stream but don't want to show where the good drops were placed.",
 	tags = {
 		"drop",
 		"party",

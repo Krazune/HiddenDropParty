@@ -145,11 +145,21 @@ public class HiddenDropPartyPlugin extends Plugin
 	@Subscribe
 	public void onConfigChanged(ConfigChanged configChanged)
 	{
-		if (configChanged.getKey().equals("customTileModelIds"))
+		String keyName = configChanged.getKey();
+
+		if (keyName.equals("tileModelIdsGroup"))
+		{
+			loadTilesModelIdsConfig();
+		}
+		else if (keyName.equals("chestModelIdsGroup"))
+		{
+			loadChestModelIdsConfig();
+		}
+		else if (keyName.equals("customTileModelIds") && config.getTileModelIdsGroup() == TileModelIdsGroup.CUSTOM)
 		{
 			tileModelIds = parseIds(config.getCustomTileModelIds(), DEFAULT_TILE_MODEL_ID);
 		}
-		else if (configChanged.getKey().equals("customChestModelIds"))
+		else if (keyName.equals("customChestModelIds") && config.getChestModelIdsGroup() == ChestModelIdsGroup.CUSTOM)
 		{
 			chestModelIds = parseIds(config.getCustomChestModelIds(), DEFAULT_CHEST_MODEL_ID);
 		}
@@ -188,8 +198,32 @@ public class HiddenDropPartyPlugin extends Plugin
 
 	private void loadModelIdsConfig()
 	{
-		tileModelIds = parseIds(config.getCustomTileModelIds(), DEFAULT_TILE_MODEL_ID);
-		chestModelIds = parseIds(config.getCustomChestModelIds(), DEFAULT_CHEST_MODEL_ID);
+		loadTilesModelIdsConfig();
+		loadChestModelIdsConfig();
+	}
+
+	private void loadTilesModelIdsConfig()
+	{
+		if (config.getTileModelIdsGroup() == TileModelIdsGroup.CUSTOM)
+		{
+			tileModelIds = parseIds(config.getCustomTileModelIds(), DEFAULT_TILE_MODEL_ID);
+		}
+		else
+		{
+			tileModelIds = parseIds(config.getTileModelIdsGroup().getValue(), DEFAULT_TILE_MODEL_ID);
+		}
+	}
+
+	private void loadChestModelIdsConfig()
+	{
+		if (config.getChestModelIdsGroup() == ChestModelIdsGroup.CUSTOM.CUSTOM)
+		{
+			chestModelIds = parseIds(config.getCustomChestModelIds(), DEFAULT_CHEST_MODEL_ID);
+		}
+		else
+		{
+			chestModelIds = parseIds(config.getChestModelIdsGroup().getValue(), DEFAULT_CHEST_MODEL_ID);
+		}
 	}
 
 	private void updateModelIds()

@@ -36,11 +36,26 @@ Here are some model IDs that might be useful. See the full list on [OSRSBox](htt
 #### 11123 (default)
 ![11123](resources/11123.png)
 ---
+#### 12152 (wooden crates)
+![12152](resources/12152.png)
+---
+#### 15509 (wooden crates)
+![15509](resources/15509.png)
+---
 #### 15567 (default)
 ![15567](resources/15567.png)
 ---
 #### 15885 (default)
 ![15885](resources/15885.png)
+---
+#### 29973 (wooden crates)
+![29973](resources/29973.png)
+---
+#### 31450 (wooden crates)
+![31450](resources/31450.png)
+---
+#### 33922 (wooden crates)
+![33922](resources/33922.png)
 ---
 
 ## Configurations

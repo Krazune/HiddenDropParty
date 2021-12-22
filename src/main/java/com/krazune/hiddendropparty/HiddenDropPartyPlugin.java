@@ -145,11 +145,11 @@ public class HiddenDropPartyPlugin extends Plugin
 	@Subscribe
 	public void onConfigChanged(ConfigChanged configChanged)
 	{
-		if (configChanged.getKey().equals("tileModelIds"))
+		if (configChanged.getKey().equals("customTileModelIds"))
 		{
 			tileModelIds = parseIds(config.getCustomTileModelIds(), DEFAULT_TILE_MODEL_ID);
 		}
-		else if (configChanged.getKey().equals("chestModelIds"))
+		else if (configChanged.getKey().equals("customChestModelIds"))
 		{
 			chestModelIds = parseIds(config.getCustomChestModelIds(), DEFAULT_CHEST_MODEL_ID);
 		}

@@ -33,21 +33,24 @@ import java.util.Map;
 import java.util.Random;
 import net.runelite.api.Client;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.client.callback.ClientThread;
 
 public class KObjectLocationRegistry
 {
 	private final int RANDOM_COMMON_SEED = new Random().nextInt();
 
-	private Client client;
+	private final Client client;
+	private final ClientThread clientThread;
 
 	private Map<WorldPoint, KObjectCounter> registry;
 
 	private List<Integer> tileModelIds;
 	private List<Integer> chestModelIds;
 
-	public KObjectLocationRegistry(Client client, List<Integer> tileModelIds, List<Integer> chestModelIds)
+	public KObjectLocationRegistry(Client client, ClientThread clientThread, List<Integer> tileModelIds, List<Integer> chestModelIds)
 	{
 		this.client = client;
+		this.clientThread = clientThread;
 		registry = new HashMap<>();
 		this.tileModelIds = tileModelIds;
 		this.chestModelIds = chestModelIds;
@@ -75,7 +78,7 @@ public class KObjectLocationRegistry
 		int tileModelId = getRandomTileModelId(location);
 		int chestModelId = getRandomChestModelId(location);
 
-		return new KObject(client, location, tileModelId, chestModelId);
+		return new KObject(client, clientThread, location, tileModelId, chestModelId);
 	}
 
 	private int getRandomTileModelId(WorldPoint location)

@@ -176,7 +176,7 @@ public class HiddenDropPartyPlugin extends Plugin
 	{
 		loadModelIdsConfig();
 
-		registry = new KObjectLocationRegistry(client, tileModelIds, chestModelIds);
+		registry = new KObjectLocationRegistry(client, clientThread, tileModelIds, chestModelIds);
 		fakeDropLocationSpawnInstants = new HashMap<>();
 		lastTickPlaneId = client.getPlane();
 	}
@@ -296,7 +296,7 @@ public class HiddenDropPartyPlugin extends Plugin
 	private void resetRegistry()
 	{
 		registry.despawnAll();
-		registry = new KObjectLocationRegistry(client, tileModelIds, chestModelIds);
+		registry = new KObjectLocationRegistry(client, clientThread, tileModelIds, chestModelIds);
 	}
 
 	private void recreateFakeDrops()

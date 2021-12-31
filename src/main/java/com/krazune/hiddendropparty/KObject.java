@@ -27,6 +27,8 @@
  */
 package com.krazune.hiddendropparty;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import net.runelite.api.Client;
@@ -34,19 +36,24 @@ import net.runelite.api.Model;
 import net.runelite.api.RuneLiteObject;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.client.callback.ClientThread;
 
 // I swear I'm not narcissistic, I just didn't know what to name this class. Might change in the future.
 public class KObject
 {
+	private final Duration MODEL_LOAD_TIMEOUT_DURATION = Duration.ofSeconds(1);
+
 	private final Client client;
+	private final ClientThread clientThread;
 
 	private final WorldPoint location;
 	private final List<Integer> modelIds;
 	private List<RuneLiteObject> objects;
 
-	public KObject(Client client, WorldPoint location, int... modelIds)
+	public KObject(Client client, ClientThread clientThread, WorldPoint location, int... modelIds)
 	{
 		this.client = client;
+		this.clientThread = clientThread;
 		this.location = location;
 		this.modelIds = new ArrayList<>();
 
@@ -58,9 +65,10 @@ public class KObject
 		objects = new ArrayList<>();
 	}
 
-	public KObject(Client client, WorldPoint location, List<Integer> modelIds)
+	public KObject(Client client, ClientThread clientThread, WorldPoint location, List<Integer> modelIds)
 	{
 		this.client = client;
+		this.clientThread = clientThread;
 		this.location = location;
 		this.modelIds = modelIds;
 		objects = new ArrayList<>();
@@ -89,17 +97,20 @@ public class KObject
 				continue;
 			}
 
-			Model newModel = client.loadModel(modelIds.get(i));
+			RuneLiteObject newObject = client.createRuneLiteObject();
+			int modelId = modelIds.get(i);
+			Model newModel = client.loadModel(modelId);
 
 			if (newModel == null)
 			{
-				continue;
+				repeatingModelLoading(newObject, modelId);
+			}
+			else
+			{
+				newObject.setModel(newModel);
 			}
 
-			RuneLiteObject newObject = client.createRuneLiteObject();
-
 			newObject.setLocation(localLocation, location.getPlane());
-			newObject.setModel(newModel);
 			newObject.setActive(true);
 
 			objects.add(newObject);
@@ -114,5 +125,29 @@ public class KObject
 		}
 
 		objects.clear();
+	}
+
+	private void repeatingModelLoading(RuneLiteObject object, int modelId)
+	{
+		final Instant loadTimeoutInstant = Instant.now().plus(MODEL_LOAD_TIMEOUT_DURATION);
+
+		clientThread.invokeLater(() ->
+		{
+			if (Instant.now().isAfter(loadTimeoutInstant))
+			{
+				return true;
+			}
+
+			Model newModel = client.loadModel(modelId);
+
+			if (newModel == null)
+			{
+				return false;
+			}
+
+			object.setModel(newModel);
+
+			return true;
+		});
 	}
 }

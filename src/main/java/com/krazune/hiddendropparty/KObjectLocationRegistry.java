@@ -39,9 +39,8 @@ public class KObjectLocationRegistry
 {
 	private final int RANDOM_COMMON_SEED = new Random().nextInt();
 
+	private final Client client;
 	private final ClientThread clientThread;
-
-	private Client client;
 
 	private Map<WorldPoint, KObjectCounter> registry;
 

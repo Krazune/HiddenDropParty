@@ -111,7 +111,18 @@ public class KObject
 			}
 
 			newObject.setLocation(localLocation, location.getPlane());
-			newObject.setActive(true);
+
+			if (client.isClientThread())
+			{
+				newObject.setActive(true);
+			}
+			else
+			{
+				clientThread.invokeLater(() ->
+				{
+					newObject.setActive(true);
+				});
+			}
 
 			objects.add(newObject);
 		}
@@ -119,9 +130,23 @@ public class KObject
 
 	public void despawn()
 	{
+		boolean isClientThread = client.isClientThread();
+
 		for (int i = 0; i < objects.size(); ++i)
 		{
-			objects.get(i).setActive(false);
+			final RuneLiteObject currentObject = objects.get(i);
+
+			if (isClientThread)
+			{
+				currentObject.setActive(false);
+
+				continue;
+			}
+
+			clientThread.invokeLater(() ->
+			{
+				currentObject.setActive(false);
+			});
 		}
 
 		objects.clear();

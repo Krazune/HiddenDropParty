@@ -129,7 +129,7 @@ public class HiddenDropPartyPlugin extends Plugin
 
 		if (newState == GameState.LOGIN_SCREEN || newState == GameState.HOPPING)
 		{
-			clientThread.invokeLater(this::resetRegistry);
+			resetRegistry();
 			fakeDropLocationSpawnInstants.clear();
 		}
 		else if (newState == GameState.LOADING)
@@ -168,7 +168,7 @@ public class HiddenDropPartyPlugin extends Plugin
 			return;
 		}
 
-		clientThread.invokeLater(this::updateModelIds);
+		updateModelIds();
 	}
 
 	@Override
@@ -184,7 +184,8 @@ public class HiddenDropPartyPlugin extends Plugin
 	@Override
 	protected void shutDown()
 	{
-		clientThread.invokeLater(this::deleteRegistry);
+		deleteRegistry();
+
 		fakeDropLocationSpawnInstants = null;
 		tileModelIds = null;
 		chestModelIds = null;

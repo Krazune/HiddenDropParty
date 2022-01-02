@@ -34,6 +34,7 @@ import java.util.Random;
 import net.runelite.api.Client;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.eventbus.EventBus;
 
 public class KObjectLocationRegistry
 {
@@ -41,16 +42,19 @@ public class KObjectLocationRegistry
 
 	private final Client client;
 	private final ClientThread clientThread;
+	private final EventBus eventBus;
 
 	private Map<WorldPoint, KObjectCounter> registry;
 
 	private List<Integer> tileModelIds;
 	private List<Integer> chestModelIds;
 
-	public KObjectLocationRegistry(Client client, ClientThread clientThread, List<Integer> tileModelIds, List<Integer> chestModelIds)
+	public KObjectLocationRegistry(Client client, ClientThread clientThread, EventBus eventBus, List<Integer> tileModelIds, List<Integer> chestModelIds)
 	{
 		this.client = client;
 		this.clientThread = clientThread;
+		this.eventBus = eventBus;
+
 		registry = new HashMap<>();
 		this.tileModelIds = tileModelIds;
 		this.chestModelIds = chestModelIds;
@@ -70,7 +74,7 @@ public class KObjectLocationRegistry
 		KObject newObject = createRandomKObject(location);
 
 		registry.put(location, new KObjectCounter(newObject, 1));
-		newObject.spawn();
+		newObject.setActive(true);
 	}
 
 	public KObject createRandomKObject(WorldPoint location)
@@ -78,7 +82,7 @@ public class KObjectLocationRegistry
 		int tileModelId = getRandomTileModelId(location);
 		int chestModelId = getRandomChestModelId(location);
 
-		return new KObject(client, clientThread, location, tileModelId, chestModelId);
+		return new KObject(client, clientThread, eventBus, location, tileModelId, chestModelId);
 	}
 
 	private int getRandomTileModelId(WorldPoint location)
@@ -144,30 +148,30 @@ public class KObjectLocationRegistry
 			return;
 		}
 
-		kObjectCounter.getKObject().despawn();
+		kObjectCounter.getKObject().setActive(false);
 		registry.remove(location);
 	}
 
 	public void reset()
 	{
-		despawnAll();
+		deactivateAll();
 
 		registry = new HashMap<>();
 	}
 
-	public void spawnAll()
+	public void activateAll()
 	{
 		for (KObjectCounter kObjectCounter : registry.values())
 		{
-			kObjectCounter.getKObject().spawn();
+			kObjectCounter.getKObject().setActive(true);
 		}
 	}
 
-	public void despawnAll()
+	public void deactivateAll()
 	{
 		for (KObjectCounter kObjectCounter : registry.values())
 		{
-			kObjectCounter.getKObject().despawn();
+			kObjectCounter.getKObject().setActive(false);
 		}
 	}
 
@@ -177,9 +181,9 @@ public class KObjectLocationRegistry
 		{
 			WorldPoint location = kObjectCounter.getKObject().getLocation();
 
-			kObjectCounter.getKObject().despawn();
+			kObjectCounter.getKObject().setActive(false);
 			kObjectCounter.setkObject(createRandomKObject(location));
-			kObjectCounter.getKObject().spawn();
+			kObjectCounter.getKObject().setActive(true);
 		}
 	}
 

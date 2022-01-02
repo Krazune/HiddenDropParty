@@ -32,11 +32,16 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import net.runelite.api.Client;
+import net.runelite.api.GameState;
 import net.runelite.api.Model;
 import net.runelite.api.RuneLiteObject;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.GameTick;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.eventbus.EventBus;
+import net.runelite.client.eventbus.Subscribe;
 
 // I swear I'm not narcissistic, I just didn't know what to name this class. Might change in the future.
 public class KObject
@@ -45,15 +50,23 @@ public class KObject
 
 	private final Client client;
 	private final ClientThread clientThread;
+	private final EventBus eventBus;
+
+	private boolean isActive = false;
 
 	private final WorldPoint location;
 	private final List<Integer> modelIds;
 	private List<RuneLiteObject> objects;
 
-	public KObject(Client client, ClientThread clientThread, WorldPoint location, int... modelIds)
+	private int lastTickPlaneId;
+
+	public KObject(Client client, ClientThread clientThread, EventBus eventBus, WorldPoint location, int... modelIds)
 	{
 		this.client = client;
 		this.clientThread = clientThread;
+		this.eventBus = eventBus;
+		this.eventBus.register(this);
+
 		this.location = location;
 		this.modelIds = new ArrayList<>();
 
@@ -63,15 +76,20 @@ public class KObject
 		}
 
 		objects = new ArrayList<>();
+		lastTickPlaneId = client.getPlane();
 	}
 
-	public KObject(Client client, ClientThread clientThread, WorldPoint location, List<Integer> modelIds)
+	public KObject(Client client, ClientThread clientThread, EventBus eventBus, WorldPoint location, List<Integer> modelIds)
 	{
 		this.client = client;
 		this.clientThread = clientThread;
+		this.eventBus = eventBus;
+		this.eventBus.register(this);
+
 		this.location = location;
 		this.modelIds = modelIds;
 		objects = new ArrayList<>();
+		lastTickPlaneId = client.getPlane();
 	}
 
 	public WorldPoint getLocation()
@@ -84,7 +102,69 @@ public class KObject
 		return modelIds;
 	}
 
-	public void spawn()
+	public boolean isActive()
+	{
+		return isActive;
+	}
+
+	public void setActive(boolean isActive)
+	{
+		if (this.isActive == isActive)
+		{
+			return;
+		}
+
+		if (isActive)
+		{
+			activate();
+
+			return;
+		}
+
+		deactivate();
+	}
+
+	@Subscribe
+	public void onGameTick(GameTick tick)
+	{
+		if (isActive && lastTickPlaneId != client.getPlane())
+		{
+			spawn();
+		}
+
+		lastTickPlaneId = client.getPlane();
+	}
+
+	@Subscribe
+	public void onGameStateChanged(GameStateChanged gameStateChanged)
+	{
+		GameState newState = gameStateChanged.getGameState();
+
+		if (newState == GameState.LOADING)
+		{
+			despawn();
+
+			return;
+		}
+
+		spawn();
+	}
+
+	private void activate()
+	{
+		isActive = true;
+
+		spawn();
+	}
+
+	private void deactivate()
+	{
+		isActive = false;
+
+		despawn();
+	}
+
+	private void spawn()
 	{
 		despawn();
 
@@ -128,7 +208,7 @@ public class KObject
 		}
 	}
 
-	public void despawn()
+	private void despawn()
 	{
 		boolean isClientThread = client.isClientThread();
 

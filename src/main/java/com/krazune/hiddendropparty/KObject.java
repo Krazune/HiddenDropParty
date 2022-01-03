@@ -136,9 +136,7 @@ public class KObject
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
-		GameState newState = gameStateChanged.getGameState();
-
-		switch (newState)
+		switch (gameStateChanged.getGameState())
 		{
 			case LOADING:
 				despawn();

@@ -56,6 +56,7 @@ public class KObjectLocationRegistry
 		this.eventBus = eventBus;
 
 		registry = new HashMap<>();
+
 		this.tileModelIds = tileModelIds;
 		this.chestModelIds = chestModelIds;
 	}

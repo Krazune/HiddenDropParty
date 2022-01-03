@@ -46,6 +46,7 @@ import net.runelite.api.events.ItemDespawned;
 import net.runelite.api.events.ItemSpawned;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
@@ -80,13 +81,14 @@ public class HiddenDropPartyPlugin extends Plugin
 	@Inject
 	private ClientThread clientThread;
 
+	@Inject
+	private EventBus eventBus;
+
 	private KObjectLocationRegistry registry;
 	private Map<WorldPoint, Instant> fakeDropLocationSpawnInstants;
 
 	private List<Integer> tileModelIds;
 	private List<Integer> chestModelIds;
-
-	private int lastTickPlaneId;
 
 	@Subscribe
 	public void onGameTick(GameTick tick)
@@ -99,15 +101,6 @@ public class HiddenDropPartyPlugin extends Plugin
 		{
 			createFakeDrop(client.getLocalPlayer().getWorldLocation());
 		}
-
-		if (lastTickPlaneId == client.getPlane())
-		{
-			return;
-		}
-
-		registry.spawnAll();
-
-		lastTickPlaneId = client.getPlane();
 	}
 
 	@Subscribe
@@ -131,14 +124,6 @@ public class HiddenDropPartyPlugin extends Plugin
 		{
 			resetRegistry();
 			fakeDropLocationSpawnInstants.clear();
-		}
-		else if (newState == GameState.LOADING)
-		{
-			registry.reset();
-		}
-		else if (newState == GameState.LOGGED_IN)
-		{
-			recreateFakeDrops();
 		}
 	}
 
@@ -176,9 +161,8 @@ public class HiddenDropPartyPlugin extends Plugin
 	{
 		loadModelIdsConfig();
 
-		registry = new KObjectLocationRegistry(client, clientThread, tileModelIds, chestModelIds);
+		registry = new KObjectLocationRegistry(client, clientThread, eventBus, tileModelIds, chestModelIds);
 		fakeDropLocationSpawnInstants = new HashMap<>();
-		lastTickPlaneId = client.getPlane();
 	}
 
 	@Override
@@ -296,21 +280,13 @@ public class HiddenDropPartyPlugin extends Plugin
 
 	private void resetRegistry()
 	{
-		registry.despawnAll();
-		registry = new KObjectLocationRegistry(client, clientThread, tileModelIds, chestModelIds);
-	}
-
-	private void recreateFakeDrops()
-	{
-		for (WorldPoint location : fakeDropLocationSpawnInstants.keySet())
-		{
-			registry.add(location);
-		}
+		registry.deactivateAll();
+		registry = new KObjectLocationRegistry(client, clientThread, eventBus, tileModelIds, chestModelIds);
 	}
 
 	private void deleteRegistry()
 	{
-		registry.despawnAll();
+		registry.deactivateAll();
 		registry = null;
 	}
 }

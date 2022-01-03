@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import net.runelite.api.Client;
-import net.runelite.api.GameState;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;

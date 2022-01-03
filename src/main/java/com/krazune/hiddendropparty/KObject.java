@@ -138,14 +138,16 @@ public class KObject
 	{
 		GameState newState = gameStateChanged.getGameState();
 
-		if (newState == GameState.LOADING)
+		switch (newState)
 		{
-			despawn();
+			case LOADING:
+				despawn();
+				break;
 
-			return;
+			case LOGGED_IN:
+				spawn();
+				break;
 		}
-
-		spawn();
 	}
 
 	private void activate()

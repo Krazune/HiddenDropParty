@@ -32,7 +32,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import net.runelite.api.Client;
-import net.runelite.api.GameState;
 import net.runelite.api.Model;
 import net.runelite.api.RuneLiteObject;
 import net.runelite.api.coords.LocalPoint;
@@ -136,9 +135,7 @@ public class KObject
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
-		GameState newState = gameStateChanged.getGameState();
-
-		switch (newState)
+		switch (gameStateChanged.getGameState())
 		{
 			case LOADING:
 				despawn();

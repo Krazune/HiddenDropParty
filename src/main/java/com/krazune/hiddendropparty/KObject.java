@@ -65,7 +65,6 @@ public class KObject
 		this.client = client;
 		this.clientThread = clientThread;
 		this.eventBus = eventBus;
-		this.eventBus.register(this);
 
 		this.location = location;
 		this.modelIds = new ArrayList<>();
@@ -84,7 +83,6 @@ public class KObject
 		this.client = client;
 		this.clientThread = clientThread;
 		this.eventBus = eventBus;
-		this.eventBus.register(this);
 
 		this.location = location;
 		this.modelIds = modelIds;
@@ -155,6 +153,7 @@ public class KObject
 		isActive = true;
 
 		spawn();
+		eventBus.register(this);
 	}
 
 	private void deactivate()
@@ -162,6 +161,7 @@ public class KObject
 		isActive = false;
 
 		despawn();
+		eventBus.unregister(this);
 	}
 
 	private void spawn()

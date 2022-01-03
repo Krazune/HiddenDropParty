@@ -118,12 +118,13 @@ public class HiddenDropPartyPlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
-		GameState newState = gameStateChanged.getGameState();
-
-		if (newState == GameState.LOGIN_SCREEN || newState == GameState.HOPPING)
+		switch (gameStateChanged.getGameState())
 		{
-			resetRegistry();
-			fakeDropLocationSpawnInstants.clear();
+			case LOGIN_SCREEN:
+			case HOPPING:
+				resetRegistry();
+				fakeDropLocationSpawnInstants.clear();
+				break;
 		}
 	}
 

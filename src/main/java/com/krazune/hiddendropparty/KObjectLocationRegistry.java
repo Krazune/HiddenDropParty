@@ -27,6 +27,7 @@
  */
 package com.krazune.hiddendropparty;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,10 +47,10 @@ public class KObjectLocationRegistry
 
 	private Map<WorldPoint, KObjectCounter> registry;
 
-	private List<Integer> tileModelIds;
-	private List<Integer> chestModelIds;
+	private List<List<Integer>> tileModelIdGroups;
+	private List<List<Integer>> chestModelIdGroups;
 
-	public KObjectLocationRegistry(Client client, ClientThread clientThread, EventBus eventBus, List<Integer> tileModelIds, List<Integer> chestModelIds)
+	public KObjectLocationRegistry(Client client, ClientThread clientThread, EventBus eventBus, List<List<Integer>> tileModelIdGroups, List<List<Integer>> chestModelIdGroups)
 	{
 		this.client = client;
 		this.clientThread = clientThread;
@@ -57,8 +58,8 @@ public class KObjectLocationRegistry
 
 		registry = new HashMap<>();
 
-		this.tileModelIds = tileModelIds;
-		this.chestModelIds = chestModelIds;
+		this.tileModelIdGroups = tileModelIdGroups;
+		this.chestModelIdGroups = chestModelIdGroups;
 	}
 
 	public void add(WorldPoint location)
@@ -117,30 +118,31 @@ public class KObjectLocationRegistry
 
 	public KObject createRandomKObject(WorldPoint location)
 	{
-		int tileModelId = getRandomTileModelId(location);
-		int chestModelId = getRandomChestModelId(location);
+		List<Integer> models = new ArrayList<>(getRandomTileModelIdGroup(location));
 
-		return new KObject(client, clientThread, eventBus, location, tileModelId, chestModelId);
+		models.addAll(getRandomChestModelIdGroup(location));
+
+		return new KObject(client, clientThread, eventBus, location, models);
 	}
 
-	public void setTileModelIds(List<Integer> tileModelIds)
+	public void setTileModelIdGroups(List<List<Integer>> tileModelIdGroups)
 	{
-		this.tileModelIds = tileModelIds;
+		this.tileModelIdGroups = tileModelIdGroups;
 
 		recreateAll();
 	}
 
-	public void setChestModelIds(List<Integer> chestModelIds)
+	public void setChestModelIdGroups(List<List<Integer>> chestModelIdGroups)
 	{
-		this.chestModelIds = chestModelIds;
+		this.chestModelIdGroups = chestModelIdGroups;
 
 		recreateAll();
 	}
 
-	public void setModelIds(List<Integer> tileModelIds, List<Integer> chestModelIds)
+	public void setModelIds(List<List<Integer>> tileModelIdGroups, List<List<Integer>> chestModelIdGroups)
 	{
-		this.tileModelIds = tileModelIds;
-		this.chestModelIds = chestModelIds;
+		this.tileModelIdGroups = tileModelIdGroups;
+		this.chestModelIdGroups = chestModelIdGroups;
 
 		recreateAll();
 	}
@@ -173,22 +175,22 @@ public class KObjectLocationRegistry
 		}
 	}
 
-	private int getRandomTileModelId(WorldPoint location)
+	private List<Integer> getRandomTileModelIdGroup(WorldPoint location)
 	{
 		Random random = new Random();
 
 		random.setSeed(generateSeed(location));
 
-		return tileModelIds.get(random.nextInt(tileModelIds.size()));
+		return tileModelIdGroups.get(random.nextInt(tileModelIdGroups.size()));
 	}
 
-	private int getRandomChestModelId(WorldPoint location)
+	private List<Integer> getRandomChestModelIdGroup(WorldPoint location)
 	{
 		Random random = new Random();
 
 		random.setSeed(generateSeed(location));
 
-		return chestModelIds.get(random.nextInt(chestModelIds.size()));
+		return chestModelIdGroups.get(random.nextInt(chestModelIdGroups.size()));
 	}
 
 	private int generateSeed(WorldPoint location)

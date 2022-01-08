@@ -68,8 +68,7 @@ public class HiddenDropPartyPlugin extends Plugin
 {
 	private final Duration FAKE_DROP_DURATION = Duration.ofMinutes(1);
 
-	private final int DEFAULT_TILE_MODEL_ID = 21367;
-	private final int DEFAULT_CHEST_MODEL_ID = 11123;
+	private final int EMPTY_MODEL_ID = -1; // This is hacky, but currently it's the easiest way to implement empty objects.
 
 	@Inject
 	private Client client;
@@ -142,11 +141,11 @@ public class HiddenDropPartyPlugin extends Plugin
 		}
 		else if (keyName.equals("customTileModelIds") && config.getTileModelIdsGroup() == TileModelIdsGroup.CUSTOM)
 		{
-			tileModelIdGroups = parseIds(config.getCustomTileModelIds(), DEFAULT_TILE_MODEL_ID);
+			tileModelIdGroups = parseIds(config.getCustomTileModelIds());
 		}
 		else if (keyName.equals("customChestModelIds") && config.getChestModelIdsGroup() == ChestModelIdsGroup.CUSTOM)
 		{
-			chestModelIdGroups = parseIds(config.getCustomChestModelIds(), DEFAULT_CHEST_MODEL_ID);
+			chestModelIdGroups = parseIds(config.getCustomChestModelIds());
 		}
 		else
 		{
@@ -191,11 +190,11 @@ public class HiddenDropPartyPlugin extends Plugin
 	{
 		if (config.getTileModelIdsGroup() == TileModelIdsGroup.CUSTOM)
 		{
-			tileModelIdGroups = parseIds(config.getCustomTileModelIds(), DEFAULT_TILE_MODEL_ID);
+			tileModelIdGroups = parseIds(config.getCustomTileModelIds());
 		}
 		else
 		{
-			tileModelIdGroups = parseIds(config.getTileModelIdsGroup().getValue(), DEFAULT_TILE_MODEL_ID);
+			tileModelIdGroups = parseIds(config.getTileModelIdsGroup().getValue());
 		}
 	}
 
@@ -203,11 +202,11 @@ public class HiddenDropPartyPlugin extends Plugin
 	{
 		if (config.getChestModelIdsGroup() == ChestModelIdsGroup.CUSTOM)
 		{
-			chestModelIdGroups = parseIds(config.getCustomChestModelIds(), DEFAULT_CHEST_MODEL_ID);
+			chestModelIdGroups = parseIds(config.getCustomChestModelIds());
 		}
 		else
 		{
-			chestModelIdGroups = parseIds(config.getChestModelIdsGroup().getValue(), DEFAULT_CHEST_MODEL_ID);
+			chestModelIdGroups = parseIds(config.getChestModelIdsGroup().getValue());
 		}
 	}
 
@@ -226,7 +225,7 @@ public class HiddenDropPartyPlugin extends Plugin
 		registry.add(location);
 	}
 
-	private List<List<Integer>> parseIds(String modelIdsString, int defaultModelId)
+	private List<List<Integer>> parseIds(String modelIdsString)
 	{
 		List<List<Integer>> modelIdGroups = new ArrayList<>();
 		String[] stringSplit = modelIdsString.split(",");
@@ -259,7 +258,7 @@ public class HiddenDropPartyPlugin extends Plugin
 
 			if (modelIdGroup.isEmpty())
 			{
-				continue;
+				modelIdGroup.add(EMPTY_MODEL_ID);
 			}
 
 			modelIdGroups.add(modelIdGroup);
@@ -269,7 +268,7 @@ public class HiddenDropPartyPlugin extends Plugin
 		{
 			List<Integer> defaultIdGroup = new ArrayList<>();
 
-			defaultIdGroup.add(defaultModelId);
+			defaultIdGroup.add(EMPTY_MODEL_ID);
 			modelIdGroups.add(defaultIdGroup);
 		}
 

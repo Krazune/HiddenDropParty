@@ -34,6 +34,7 @@ import net.runelite.client.config.Range;
 import net.runelite.client.config.Units;
 
 import static net.runelite.client.config.Units.PERCENT;
+import static net.runelite.client.config.Units.SECONDS;
 
 @ConfigGroup("hiddendropparty")
 public interface HiddenDropPartyPluginConfig extends Config
@@ -96,5 +97,17 @@ public interface HiddenDropPartyPluginConfig extends Config
 	default int getFakeDropPercentage()
 	{
 		return 25;
+	}
+
+	@ConfigItem(
+		position = 5,
+		keyName = "objectDuration",
+		name = "Object duration",
+		description = "Object duration in seconds"
+	)
+	@Units(SECONDS)
+	default int getObjectDuration()
+	{
+		return 60;
 	}
 }

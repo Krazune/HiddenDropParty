@@ -86,8 +86,8 @@ public class HiddenDropPartyPlugin extends Plugin
 	private KObjectLocationRegistry registry;
 	private Map<WorldPoint, Instant> fakeDropLocationSpawnInstants;
 
-	private List<Integer> tileModelIds;
-	private List<Integer> chestModelIds;
+	private List<List<Integer>> tileModelIdGroups;
+	private List<List<Integer>> chestModelIdGroups;
 
 	@Subscribe
 	public void onGameTick(GameTick tick)
@@ -142,11 +142,11 @@ public class HiddenDropPartyPlugin extends Plugin
 		}
 		else if (keyName.equals("customTileModelIds") && config.getTileModelIdsGroup() == TileModelIdsGroup.CUSTOM)
 		{
-			tileModelIds = parseIds(config.getCustomTileModelIds(), DEFAULT_TILE_MODEL_ID);
+			tileModelIdGroups = parseIds(config.getCustomTileModelIds(), DEFAULT_TILE_MODEL_ID);
 		}
 		else if (keyName.equals("customChestModelIds") && config.getChestModelIdsGroup() == ChestModelIdsGroup.CUSTOM)
 		{
-			chestModelIds = parseIds(config.getCustomChestModelIds(), DEFAULT_CHEST_MODEL_ID);
+			chestModelIdGroups = parseIds(config.getCustomChestModelIds(), DEFAULT_CHEST_MODEL_ID);
 		}
 		else
 		{
@@ -161,7 +161,7 @@ public class HiddenDropPartyPlugin extends Plugin
 	{
 		loadModelIdsConfig();
 
-		registry = new KObjectLocationRegistry(client, clientThread, eventBus, tileModelIds, chestModelIds);
+		registry = new KObjectLocationRegistry(client, clientThread, eventBus, tileModelIdGroups, chestModelIdGroups);
 		fakeDropLocationSpawnInstants = new HashMap<>();
 	}
 
@@ -171,8 +171,8 @@ public class HiddenDropPartyPlugin extends Plugin
 		deleteRegistry();
 
 		fakeDropLocationSpawnInstants = null;
-		tileModelIds = null;
-		chestModelIds = null;
+		tileModelIdGroups = null;
+		chestModelIdGroups = null;
 	}
 
 	@Provides
@@ -191,29 +191,29 @@ public class HiddenDropPartyPlugin extends Plugin
 	{
 		if (config.getTileModelIdsGroup() == TileModelIdsGroup.CUSTOM)
 		{
-			tileModelIds = parseIds(config.getCustomTileModelIds(), DEFAULT_TILE_MODEL_ID);
+			tileModelIdGroups = parseIds(config.getCustomTileModelIds(), DEFAULT_TILE_MODEL_ID);
 		}
 		else
 		{
-			tileModelIds = parseIds(config.getTileModelIdsGroup().getValue(), DEFAULT_TILE_MODEL_ID);
+			tileModelIdGroups = parseIds(config.getTileModelIdsGroup().getValue(), DEFAULT_TILE_MODEL_ID);
 		}
 	}
 
 	private void loadChestModelIdsConfig()
 	{
-		if (config.getChestModelIdsGroup() == ChestModelIdsGroup.CUSTOM.CUSTOM)
+		if (config.getChestModelIdsGroup() == ChestModelIdsGroup.CUSTOM)
 		{
-			chestModelIds = parseIds(config.getCustomChestModelIds(), DEFAULT_CHEST_MODEL_ID);
+			chestModelIdGroups = parseIds(config.getCustomChestModelIds(), DEFAULT_CHEST_MODEL_ID);
 		}
 		else
 		{
-			chestModelIds = parseIds(config.getChestModelIdsGroup().getValue(), DEFAULT_CHEST_MODEL_ID);
+			chestModelIdGroups = parseIds(config.getChestModelIdsGroup().getValue(), DEFAULT_CHEST_MODEL_ID);
 		}
 	}
 
 	private void updateModelIds()
 	{
-		registry.setModelIds(tileModelIds, chestModelIds);
+		registry.setModelIds(tileModelIdGroups, chestModelIdGroups);
 	}
 
 	private void createFakeDrop(WorldPoint location)
@@ -226,38 +226,54 @@ public class HiddenDropPartyPlugin extends Plugin
 		registry.add(location);
 	}
 
-	private List<Integer> parseIds(String modelIdsString, int defaultModelId)
+	private List<List<Integer>> parseIds(String modelIdsString, int defaultModelId)
 	{
-		List<Integer> modelIds = new ArrayList<>();
+		List<List<Integer>> modelIdGroups = new ArrayList<>();
 		String[] stringSplit = modelIdsString.split(",");
 
 		for (int i = 0; i < stringSplit.length; ++i)
 		{
-			int  modelId;
+			List<Integer> modelIdGroup = new ArrayList<>();
+			String[] groupSplit = stringSplit[i].split("\\+");
 
-			try
+			for (int j = 0; j < groupSplit.length; ++j)
 			{
-				modelId = Integer.parseInt(stringSplit[i]);
+				int modelId;
+
+				try
+				{
+					modelId = Integer.parseInt(groupSplit[j].trim());
+				}
+				catch (NumberFormatException e)
+				{
+					continue;
+				}
+
+				if (modelId < 0)
+				{
+					continue;
+				}
+
+				modelIdGroup.add(modelId);
 			}
-			catch (NumberFormatException e)
+
+			if (modelIdGroup.isEmpty())
 			{
 				continue;
 			}
 
-			if (modelId < 0)
-			{
-				continue;
-			}
-
-			modelIds.add(modelId);
+			modelIdGroups.add(modelIdGroup);
 		}
 
-		if (modelIds.isEmpty())
+		if (modelIdGroups.isEmpty())
 		{
-			modelIds.add(defaultModelId);
+			List<Integer> defaultIdGroup = new ArrayList<>();
+
+			defaultIdGroup.add(defaultModelId);
+			modelIdGroups.add(defaultIdGroup);
 		}
 
-		return modelIds;
+		return modelIdGroups;
 	}
 
 	private void removeOldFakeDrops()
@@ -281,7 +297,7 @@ public class HiddenDropPartyPlugin extends Plugin
 	private void resetRegistry()
 	{
 		registry.deactivateAll();
-		registry = new KObjectLocationRegistry(client, clientThread, eventBus, tileModelIds, chestModelIds);
+		registry = new KObjectLocationRegistry(client, clientThread, eventBus, tileModelIdGroups, chestModelIdGroups);
 	}
 
 	private void deleteRegistry()

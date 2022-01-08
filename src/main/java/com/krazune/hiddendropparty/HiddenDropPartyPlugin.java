@@ -201,7 +201,7 @@ public class HiddenDropPartyPlugin extends Plugin
 
 	private void loadChestModelIdsConfig()
 	{
-		if (config.getChestModelIdsGroup() == ChestModelIdsGroup.CUSTOM.CUSTOM)
+		if (config.getChestModelIdsGroup() == ChestModelIdsGroup.CUSTOM)
 		{
 			chestModelIdGroups = parseIds(config.getCustomChestModelIds(), DEFAULT_CHEST_MODEL_ID);
 		}

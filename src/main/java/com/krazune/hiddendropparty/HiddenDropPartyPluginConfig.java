@@ -53,7 +53,7 @@ public interface HiddenDropPartyPluginConfig extends Config
 		position = 1,
 		keyName = "customTileModelIds",
 		name = "Custom tile model IDs",
-		description = "List of model IDs for the obstructing tiles, separated by commas (the GitHub page has some useful IDs)."
+		description = "List of model IDs for the obstructing tiles, separated by commas, and multiple ids grouped by plus sign (the GitHub page has some useful IDs)."
 	)
 	default String getCustomTileModelIds()
 	{
@@ -75,7 +75,7 @@ public interface HiddenDropPartyPluginConfig extends Config
 		position = 3,
 		keyName = "customChestModelIds",
 		name = "Custom chest model IDs",
-		description = "List of model IDs for the main objects, separated by commas (the GitHub page has some useful IDs)."
+		description = "List of model IDs for the main objects, separated by commas, and multiple ids grouped by plus sign (the GitHub page has some useful IDs)."
 	)
 	default String getCustomChestModelIds()
 	{

@@ -66,8 +66,6 @@ import net.runelite.client.plugins.PluginDescriptor;
 )
 public class HiddenDropPartyPlugin extends Plugin
 {
-	private final Duration FAKE_DROP_DURATION = Duration.ofMinutes(1);
-
 	private final int EMPTY_MODEL_ID = -1; // This is hacky, but currently it's the easiest way to implement empty objects.
 
 	@Inject
@@ -278,12 +276,13 @@ public class HiddenDropPartyPlugin extends Plugin
 	private void removeOldFakeDrops()
 	{
 		Iterator<Map.Entry<WorldPoint, Instant>> i = fakeDropLocationSpawnInstants.entrySet().iterator();
+		Duration objectDuration = Duration.ofSeconds(config.getObjectDuration());
 
 		while (i.hasNext())
 		{
 			Map.Entry<WorldPoint, Instant> entry = i.next();
 
-			if (Duration.between(entry.getValue(), Instant.now()).compareTo(FAKE_DROP_DURATION) < 0)
+			if (Duration.between(entry.getValue(), Instant.now()).compareTo(objectDuration) < 0)
 			{
 				continue;
 			}

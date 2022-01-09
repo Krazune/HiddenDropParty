@@ -34,6 +34,7 @@ import net.runelite.client.config.Range;
 import net.runelite.client.config.Units;
 
 import static net.runelite.client.config.Units.PERCENT;
+import static net.runelite.client.config.Units.SECONDS;
 
 @ConfigGroup("hiddendropparty")
 public interface HiddenDropPartyPluginConfig extends Config
@@ -53,7 +54,7 @@ public interface HiddenDropPartyPluginConfig extends Config
 		position = 1,
 		keyName = "customTileModelIds",
 		name = "Custom tile model IDs",
-		description = "List of model IDs for the obstructing tiles, separated by commas (the GitHub page has some useful IDs)."
+		description = "List of model IDs for the obstructing tiles, separated by commas, and multiple ids grouped by plus sign (the GitHub page has some useful IDs)."
 	)
 	default String getCustomTileModelIds()
 	{
@@ -75,7 +76,7 @@ public interface HiddenDropPartyPluginConfig extends Config
 		position = 3,
 		keyName = "customChestModelIds",
 		name = "Custom chest model IDs",
-		description = "List of model IDs for the main objects, separated by commas (the GitHub page has some useful IDs)."
+		description = "List of model IDs for the main objects, separated by commas, and multiple ids grouped by plus sign (the GitHub page has some useful IDs)."
 	)
 	default String getCustomChestModelIds()
 	{
@@ -96,5 +97,17 @@ public interface HiddenDropPartyPluginConfig extends Config
 	default int getFakeDropPercentage()
 	{
 		return 25;
+	}
+
+	@ConfigItem(
+		position = 5,
+		keyName = "objectDuration",
+		name = "Object duration",
+		description = "Object duration in seconds"
+	)
+	@Units(SECONDS)
+	default int getObjectDuration()
+	{
+		return 60;
 	}
 }

@@ -2,7 +2,7 @@
 RuneLite plugin that hides drops.  Useful for streamers that want to make drop parties on stream but don't want to show where the good drops were placed.
 
 ## Version
-Current version: **2022.01.2**
+Current version: **2022.01.3**
 
 *The version format is &quot;&lt;year&gt;.&lt;zero padded month&gt;.&lt;revision number&gt;&quot;.*
 
@@ -72,6 +72,16 @@ Here are some model IDs that might be useful. See the full list on [OSRSBox](htt
 
 ## Configurations
 ![Configurations](resources/configurations.png)
+
+Custom model IDs are separated by commas, and multiple IDs can be grouped using the plus sign (the drawing order is based on the ID order).
+
+Example: ```2 + 99, 3, 4, 5 + 99```
+
+The result of spawning the IDs 2 and 99:
+
+![Group IDs example](resources/groupids.png)
+
+*The head and the hat are two different objects.*
 
 ## License
 [BSD 2-Clause License](LICENSE)

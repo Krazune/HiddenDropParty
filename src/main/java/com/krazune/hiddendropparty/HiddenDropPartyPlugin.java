@@ -66,10 +66,7 @@ import net.runelite.client.plugins.PluginDescriptor;
 )
 public class HiddenDropPartyPlugin extends Plugin
 {
-	private final Duration FAKE_DROP_DURATION = Duration.ofMinutes(1);
-
-	private final int DEFAULT_TILE_MODEL_ID = 21367;
-	private final int DEFAULT_CHEST_MODEL_ID = 11123;
+	private final int EMPTY_MODEL_ID = -1; // This is hacky, but currently it's the easiest way to implement empty objects.
 
 	@Inject
 	private Client client;
@@ -86,8 +83,8 @@ public class HiddenDropPartyPlugin extends Plugin
 	private KObjectLocationRegistry registry;
 	private Map<WorldPoint, Instant> fakeDropLocationSpawnInstants;
 
-	private List<Integer> tileModelIds;
-	private List<Integer> chestModelIds;
+	private List<List<Integer>> tileModelIdGroups;
+	private List<List<Integer>> chestModelIdGroups;
 
 	@Subscribe
 	public void onGameTick(GameTick tick)
@@ -119,6 +116,9 @@ public class HiddenDropPartyPlugin extends Plugin
 	{
 		switch (gameStateChanged.getGameState())
 		{
+			case LOADING:
+				removeRealDrops(); // Item despawn events don't get triggered when reloading the scene, so they must be removed manually.
+				break;
 			case LOGIN_SCREEN:
 			case HOPPING:
 				resetRegistry();
@@ -142,11 +142,11 @@ public class HiddenDropPartyPlugin extends Plugin
 		}
 		else if (keyName.equals("customTileModelIds") && config.getTileModelIdsGroup() == TileModelIdsGroup.CUSTOM)
 		{
-			tileModelIds = parseIds(config.getCustomTileModelIds(), DEFAULT_TILE_MODEL_ID);
+			tileModelIdGroups = parseIds(config.getCustomTileModelIds());
 		}
 		else if (keyName.equals("customChestModelIds") && config.getChestModelIdsGroup() == ChestModelIdsGroup.CUSTOM)
 		{
-			chestModelIds = parseIds(config.getCustomChestModelIds(), DEFAULT_CHEST_MODEL_ID);
+			chestModelIdGroups = parseIds(config.getCustomChestModelIds());
 		}
 		else
 		{
@@ -161,7 +161,7 @@ public class HiddenDropPartyPlugin extends Plugin
 	{
 		loadModelIdsConfig();
 
-		registry = new KObjectLocationRegistry(client, clientThread, eventBus, tileModelIds, chestModelIds);
+		registry = new KObjectLocationRegistry(client, clientThread, eventBus, tileModelIdGroups, chestModelIdGroups);
 		fakeDropLocationSpawnInstants = new HashMap<>();
 	}
 
@@ -171,8 +171,8 @@ public class HiddenDropPartyPlugin extends Plugin
 		deleteRegistry();
 
 		fakeDropLocationSpawnInstants = null;
-		tileModelIds = null;
-		chestModelIds = null;
+		tileModelIdGroups = null;
+		chestModelIdGroups = null;
 	}
 
 	@Provides
@@ -191,29 +191,29 @@ public class HiddenDropPartyPlugin extends Plugin
 	{
 		if (config.getTileModelIdsGroup() == TileModelIdsGroup.CUSTOM)
 		{
-			tileModelIds = parseIds(config.getCustomTileModelIds(), DEFAULT_TILE_MODEL_ID);
+			tileModelIdGroups = parseIds(config.getCustomTileModelIds());
 		}
 		else
 		{
-			tileModelIds = parseIds(config.getTileModelIdsGroup().getValue(), DEFAULT_TILE_MODEL_ID);
+			tileModelIdGroups = parseIds(config.getTileModelIdsGroup().getValue());
 		}
 	}
 
 	private void loadChestModelIdsConfig()
 	{
-		if (config.getChestModelIdsGroup() == ChestModelIdsGroup.CUSTOM.CUSTOM)
+		if (config.getChestModelIdsGroup() == ChestModelIdsGroup.CUSTOM)
 		{
-			chestModelIds = parseIds(config.getCustomChestModelIds(), DEFAULT_CHEST_MODEL_ID);
+			chestModelIdGroups = parseIds(config.getCustomChestModelIds());
 		}
 		else
 		{
-			chestModelIds = parseIds(config.getChestModelIdsGroup().getValue(), DEFAULT_CHEST_MODEL_ID);
+			chestModelIdGroups = parseIds(config.getChestModelIdsGroup().getValue());
 		}
 	}
 
 	private void updateModelIds()
 	{
-		registry.setModelIds(tileModelIds, chestModelIds);
+		registry.setModelIds(tileModelIdGroups, chestModelIdGroups);
 	}
 
 	private void createFakeDrop(WorldPoint location)
@@ -226,49 +226,76 @@ public class HiddenDropPartyPlugin extends Plugin
 		registry.add(location);
 	}
 
-	private List<Integer> parseIds(String modelIdsString, int defaultModelId)
+	private List<List<Integer>> parseIds(String modelIdsString)
 	{
-		List<Integer> modelIds = new ArrayList<>();
+		List<List<Integer>> modelIdGroups = new ArrayList<>();
 		String[] stringSplit = modelIdsString.split(",");
 
 		for (int i = 0; i < stringSplit.length; ++i)
 		{
-			int  modelId;
+			List<Integer> modelIdGroup = new ArrayList<>();
+			String[] groupSplit = stringSplit[i].split("\\+");
 
-			try
+			for (int j = 0; j < groupSplit.length; ++j)
 			{
-				modelId = Integer.parseInt(stringSplit[i]);
-			}
-			catch (NumberFormatException e)
-			{
-				continue;
+				int modelId;
+
+				try
+				{
+					modelId = Integer.parseInt(groupSplit[j].trim());
+				}
+				catch (NumberFormatException e)
+				{
+					continue;
+				}
+
+				if (modelId < 0)
+				{
+					continue;
+				}
+
+				modelIdGroup.add(modelId);
 			}
 
-			if (modelId < 0)
+			if (modelIdGroup.isEmpty())
 			{
-				continue;
+				modelIdGroup.add(EMPTY_MODEL_ID);
 			}
 
-			modelIds.add(modelId);
+			modelIdGroups.add(modelIdGroup);
 		}
 
-		if (modelIds.isEmpty())
+		if (modelIdGroups.isEmpty())
 		{
-			modelIds.add(defaultModelId);
+			List<Integer> defaultIdGroup = new ArrayList<>();
+
+			defaultIdGroup.add(EMPTY_MODEL_ID);
+			modelIdGroups.add(defaultIdGroup);
 		}
 
-		return modelIds;
+		return modelIdGroups;
+	}
+
+	private void removeRealDrops()
+	{
+		registry.reset();
+
+		for (WorldPoint location : fakeDropLocationSpawnInstants.keySet())
+		{
+			registry.add(location);
+		}
 	}
 
 	private void removeOldFakeDrops()
 	{
 		Iterator<Map.Entry<WorldPoint, Instant>> i = fakeDropLocationSpawnInstants.entrySet().iterator();
+		Duration objectDuration = Duration.ofSeconds(config.getObjectDuration());
 
 		while (i.hasNext())
 		{
 			Map.Entry<WorldPoint, Instant> entry = i.next();
 
-			if (Duration.between(entry.getValue(), Instant.now()).compareTo(FAKE_DROP_DURATION) < 0)
+			if (Duration.between(entry.getValue(), Instant.now()).compareTo(objectDuration) < 0)
 			{
 				continue;
 			}
@@ -281,7 +308,7 @@ public class HiddenDropPartyPlugin extends Plugin
 	private void resetRegistry()
 	{
 		registry.deactivateAll();
-		registry = new KObjectLocationRegistry(client, clientThread, eventBus, tileModelIds, chestModelIds);
+		registry = new KObjectLocationRegistry(client, clientThread, eventBus, tileModelIdGroups, chestModelIdGroups);
 	}
 
 	private void deleteRegistry()

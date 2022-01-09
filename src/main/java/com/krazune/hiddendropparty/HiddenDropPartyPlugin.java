@@ -116,6 +116,9 @@ public class HiddenDropPartyPlugin extends Plugin
 	{
 		switch (gameStateChanged.getGameState())
 		{
+			case LOADING:
+				removeRealDrops(); // Item despawn events don't get triggered when reloading the scene, so they must be removed manually.
+				break;
 			case LOGIN_SCREEN:
 			case HOPPING:
 				resetRegistry();
@@ -271,6 +274,16 @@ public class HiddenDropPartyPlugin extends Plugin
 		}
 
 		return modelIdGroups;
+	}
+
+	private void removeRealDrops()
+	{
+		registry.reset();
+
+		for (WorldPoint location : fakeDropLocationSpawnInstants.keySet())
+		{
+			registry.add(location);
+		}
 	}
 
 	private void removeOldFakeDrops()
